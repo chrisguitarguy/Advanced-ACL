@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Advanced ACL
  * Plugin URI: https://github.com/chrisguitarguy/Advanced-ACL
- * Description: Extend the WordPress roles and capabilities with a custom ACL system build for membership sites.
+ * Description: Extend the WordPress roles and capabilities with a custom ACL system built for membership sites.
  * Version: 0.1
  * Text Domain: advanced-acl
  * Author: Christopher Davis
