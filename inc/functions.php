@@ -20,6 +20,7 @@ function advancedacl_load()
     if (is_admin()) {
         AdvancedACL\Admin\CapabilityEdit::init();
         AdvancedACL\Admin\CapabilityList::init();
+        AdvancedACL\Admin\RoleList::init();
     }
 
     do_action('advancedacl_loaded');
