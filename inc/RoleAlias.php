@@ -99,25 +99,25 @@ class RoleAlias extends ACLBase
 
     private function getTerms($term_group)
     {
-        $this->enableTermGroup();
+        static::enableTermGroup();
 
         $terms = get_terms(static::A_ROLE, array(
             'term_group'    => $term_group,
             'hide_empty'    => false,
         ));
 
-        $this->disableTermGroup();
+        static::disableTermGroup();
 
         return $terms;
     }
 
-    private function enableTermGroup()
+    private static function enableTermGroup()
     {
-        add_filter('terms_clauses', array($this, 'termGroupSql'), 10, 3);
+        add_filter('terms_clauses', array(static::instance(), 'termGroupSql'), 10, 3);
     }
 
-    private function disableTermGroup()
+    private static function disableTermGroup()
     {
-        remove_filter('terms_clauses', array($this, 'termGroupSql'), 10, 3);
+        remove_filter('terms_clauses', array(static::instance(), 'termGroupSql'), 10, 3);
     }
 }
