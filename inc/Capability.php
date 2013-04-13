@@ -35,7 +35,7 @@ class Capability extends ACLBase
             'not_found_in_trash'    => __('No Capabilities in Trash', AACL_TD),
         ));
 
-        $cap = 'manage_options';
+        $cap = static::getEditCap();
         $args = static::filter('capability_type_args', array(
             'label'                 => __('Capabilities', AACL_TD),
             'labels'                => $labels,

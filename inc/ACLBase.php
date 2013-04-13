@@ -63,6 +63,11 @@ abstract class ACLBase
 
     abstract public function _setup();
 
+    protected static function getEditCap()
+    {
+        return static::filter('edit_capability', 'manage_options');
+    }
+
     private static function prefixHook($name)
     {
         return "advancedacl_{$name}";

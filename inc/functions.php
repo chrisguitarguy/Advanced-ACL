@@ -15,6 +15,7 @@ use Chrisguitarguy\AdvancedACL;
 function advancedacl_load()
 {
     AdvancedACL\Capability::init();
+    AdvancedACL\Role::init();
 
     if (is_admin()) {
         AdvancedACL\Admin\CapabilityEdit::init();
