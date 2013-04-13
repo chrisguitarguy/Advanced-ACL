@@ -14,8 +14,9 @@ namespace Chrisguitarguy\AdvancedACL;
 
 abstract class ACLBase
 {
-    const CAP   = 'aacl_cap';
-    const ROLE  = 'aacl_role';
+    const CAP       = 'aacl_cap'; // capability post type
+    const ROLE      = 'aacl_role'; // role taxonomy
+    const A_ROLE    = 'aacl_urole'; // user role taxonomy, alias of ROLE
 
     private static $reg = array();
 
