@@ -17,6 +17,7 @@ class Capability extends \Chrisguitarguy\AdvancedACL\ACLBase
     public function _setup()
     {
         add_action('add_meta_boxes_' . static::CAP, array($this, 'metaBoxes'));
+        add_filter('post_updated_messages', array($this, 'statusMessages'));
     }
 
     public function metaBoxes()
@@ -36,7 +37,8 @@ class Capability extends \Chrisguitarguy\AdvancedACL\ACLBase
     public function saveBoxCallback($post)
     {
         ?>
-        <div style="display:none"><?php submit_button(__('Save', AACL_TD), 'button', 'save'); ?></div>
+        <?php submit_button(__('Save', AACL_TD), 'hidden', 'pre_save', false); ?>
+
         <div id="misc-publishing-actions">
 
             <div class="misc-pub-section">
@@ -75,6 +77,13 @@ class Capability extends \Chrisguitarguy\AdvancedACL\ACLBase
             <div class="clear"> </div>
         </div>
         <?php
+    }
+
+    public function statusMessages($messages)
+    {
+        $messages[static::CAP] = array_fill(1, 10, __('Capability updated.', AACL_TD));
+
+        return $messages;
     }
 
     private function getStati()
