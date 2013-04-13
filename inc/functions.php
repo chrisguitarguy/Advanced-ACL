@@ -10,7 +10,11 @@
  * @license     http://opensource.org/licenses/MIT MIT
  */
 
+use Chrisguitarguy\AdvancedACL;
+
 function advancedacl_load()
 {
+    AdvancedACL\Capability::init();
+
     do_action('advancedacl_loaded');
 }
