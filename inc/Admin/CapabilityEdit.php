@@ -12,11 +12,13 @@
 
 namespace Chrisguitarguy\AdvancedACL\Admin;
 
-class Capability extends \Chrisguitarguy\AdvancedACL\ACLBase
+class CapabilityEdit extends \Chrisguitarguy\AdvancedACL\ACLBase
 {
     public function _setup()
     {
         add_action('add_meta_boxes_' . static::CAP, array($this, 'metaBoxes'));
+        add_action('load-post.php', array($this, 'loadEditScreen'));
+        add_action('load-post-new.php', array($this, 'loadEditScreen'));
         add_filter('post_updated_messages', array($this, 'statusMessages'));
     }
 
@@ -32,6 +34,18 @@ class Capability extends \Chrisguitarguy\AdvancedACL\ACLBase
             'side',
             'high'
         );
+    }
+
+    public function loadEditScreen()
+    {
+        $screen = get_current_screen();
+
+        if (empty($screen->post_type) || static::CAP !== $screen->post_type) {
+            return;
+        }
+
+        add_action('edit_form_after_title', array($this, 'showContent'));
+        add_filter('enter_title_here', array($this, 'enterTitle'));
     }
 
     public function saveBoxCallback($post)
@@ -84,6 +98,25 @@ class Capability extends \Chrisguitarguy\AdvancedACL\ACLBase
         $messages[static::CAP] = array_fill(1, 10, __('Capability updated.', AACL_TD));
 
         return $messages;
+    }
+
+    public function showContent()
+    {
+        $content = empty($_GET['post']) ? '' : get_post_field('post_content', $_GET['post'], 'raw');
+
+        echo '<h3 style="padding-left: 0; padding-right:0">';
+        echo '<label for="cap_desc">', __('Description', AACL_TD), '</label>';
+        echo '</h3>';
+
+        printf(
+            '<textarea name="content" id="cap_desc" class="widefat" rows="10">%1$s</textarea>',
+            esc_textarea($content)
+        );
+    }
+
+    public function enterTitle($t)
+    {
+        return __('Capability Name', AACL_TD);
     }
 
     private function getStati()
