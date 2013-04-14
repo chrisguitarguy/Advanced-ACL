@@ -68,23 +68,7 @@ class Role extends ACLBase
 
         $terms = static::resolveParent($term, array($term_id));
 
-        $posts = get_posts(array(
-            'post_type'         => static::CAP,
-            'nopaging'          => true,
-            'suppress_filters'  => false,
-            'tax_query'         => array(
-                array(
-                    'taxonomy'          => static::ROLE,
-                    'terms'             => $terms,
-                    'include_children'  => false,
-                    'operator'          => 'IN',
-                ),
-            ),
-        ));
-
-        $caps = array_map(function($post) {
-            return $post->post_title;
-        }, $posts);
+        $caps = static::getCapsByRoles($terms);
 
         array_unshift($caps, $term->slug);
 
@@ -111,7 +95,41 @@ class Role extends ACLBase
 
         $roles = $wpdb->get_results($stm);
 
+        if ($roles) {
+            update_term_cache($roles);
+        } else {
+            $roles = array();
+        }
+
         return static::filter('roles_from_aliases', $roles, $user_id);
+    }
+
+    public static function getCapabilitiesForUser($user_id)
+    {
+        global $wpdb;
+
+        $roles = static::getRolesForUser($user_id);
+
+        if (!$roles) {
+            return array();
+        }
+
+        $ids = array_map(function($t) {
+            return $t->term_id;
+        }, $roles);
+
+        // resolve parents.
+        foreach ($roles as $role) {
+            $ids = static::resolveParent($role, $ids);
+        }
+
+        $caps = static::getCapsByRoles(array_unique($ids));
+
+        foreach ($roles as $role) {
+            array_unshift($caps, $role->slug);
+        }
+
+        return static::filter('caps_for_user', $caps, $roles, $user_id);
     }
 
     private static function resolveParent($term, $parents=array())
@@ -125,5 +143,28 @@ class Role extends ACLBase
 
         // check the next term to see if it has a parent
         return static::resolveParent(get_term($term->parent, static::ROLE), $parents);
+    }
+
+    private static function getCapsByRoles($role_list)
+    {
+        $posts = get_posts(array(
+            'post_type'         => static::CAP,
+            'nopaging'          => true,
+            'suppress_filters'  => false,
+            'tax_query'         => array(
+                array(
+                    'taxonomy'          => static::ROLE,
+                    'terms'             => $role_list,
+                    'include_children'  => false,
+                    'operator'          => 'IN',
+                ),
+            ),
+        ));
+
+        $caps = array_map(function($post) {
+            return $post->post_title;
+        }, $posts);
+
+        return $caps;
     }
 }
