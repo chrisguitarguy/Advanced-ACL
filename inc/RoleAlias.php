@@ -113,38 +113,9 @@ class RoleAlias extends ACLBase
             $out[$t->term_id] = $t->name;
         }
 
+        asort($out);
+
         return static::filter('role_dropdown_terms', $out);
-    }
-
-    public static function getRolesFromAlias($terms)
-    {
-        global $wpdb;
-
-        if (!is_array($terms)) {
-            $terms = array($terms);
-        }
-
-        $terms = array_map('absint', $terms);
-        $where = implode(', ', array_fill(0, count($terms), '%d'));
-
-        $sql = "SELECT t.*, tt.* FROM {$wpdb->terms} AS t"
-            . " INNER JOIN {$wpdb->term_taxonomy} as TT ON t.term_id = tt.term_id"
-            . " WHERE tt.taxonomy = %s AND t.term_group IN ("
-                . " SELECT DISTINCT t2.term_group FROM {$wpdb->terms} AS t2"
-                . " INNER JOIN {$wpdb->term_taxonomy} as tt2 ON t2.term_id = tt2.term_id"
-                . " WHERE tt2.taxonomy = %s AND t2.term_id IN ({$where})"
-            . " )";
-
-        $args = array($sql, static::ROLE, static::A_ROLE);
-        foreach ($terms as $t) {
-            $args[] = $t;
-        }
-
-        $stm = call_user_func_array(array($wpdb, 'prepare'), $args);
-
-        $roles = $wpdb->get_results($stm);
-
-        return static::filter('roles_from_aliases', $roles, $terms);
     }
 
     private function getTerms($term_group)

@@ -91,6 +91,29 @@ class Role extends ACLBase
         return $caps;
     }
 
+    public static function getRolesForUser($user_id)
+    {
+        global $wpdb;
+
+        $stm = $wpdb->prepare(
+            "SELECT t.*, tt.* FROM {$wpdb->terms} AS t"
+            . " INNER JOIN {$wpdb->term_taxonomy} as TT ON t.term_id = tt.term_id"
+            . " WHERE tt.taxonomy = %s AND t.term_group IN ("
+                . " SELECT DISTINCT t2.term_group FROM {$wpdb->terms} AS t2"
+                . " INNER JOIN {$wpdb->term_taxonomy} AS tt2 ON t2.term_id = tt2.term_id"
+                . " INNER JOIN {$wpdb->term_relationships} AS tr ON tr.term_taxonomy_id = tt2.term_taxonomy_id"
+                . " WHERE tt2.taxonomy = %s AND tr.object_id = %d"
+            . " )",
+            static::ROLE,
+            static::A_ROLE,
+            $user_id
+        );
+
+        $roles = $wpdb->get_results($stm);
+
+        return static::filter('roles_from_aliases', $roles, $user_id);
+    }
+
     private static function resolveParent($term, $parents=array())
     {
         if (empty($term) || is_wp_error($term) || 0 == $term->parent) {

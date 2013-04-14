@@ -17,6 +17,7 @@ abstract class ACLBase
     const CAP       = 'aacl_cap'; // capability post type
     const ROLE      = 'aacl_role'; // role taxonomy
     const A_ROLE    = 'aacl_urole'; // user role taxonomy, alias of ROLE
+    const VER       = '0.1';
 
     private static $reg = array();
 

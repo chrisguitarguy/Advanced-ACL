@@ -22,6 +22,8 @@ function advancedacl_load()
         AdvancedACL\Admin\CapabilityEdit::init();
         AdvancedACL\Admin\CapabilityList::init();
         AdvancedACL\Admin\RoleList::init();
+        AdvancedACL\Admin\UserList::init();
+        AdvancedACL\Admin\Ajax::init();
     }
 
     do_action('advancedacl_loaded');

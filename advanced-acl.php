@@ -42,6 +42,7 @@ namespace Chrisguitarguy\AdvancedACL;
 !defined('ABSPATH') && exit;
 
 define('AACL_TD', 'advanced-acl');
+define('AACL_URL', plugin_dir_url(__FILE__));
 
 require_once __DIR__ . '/inc/Autoloader.php';
 require_once __DIR__ . '/inc/functions.php';

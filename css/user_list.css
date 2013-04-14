@@ -1,0 +1,16 @@
+#aacl-bulk-wrap {
+  display: inline-block;
+  padding-left: 8px;
+  *display: inline;
+  *zoom: 1;
+}
+
+.no-js #aacl-bulk-wrap {
+  display: none;
+}
+
+/* why we need this is beyond me */
+.js #changeit {
+  position: relative;
+  top: -9px;
+}
