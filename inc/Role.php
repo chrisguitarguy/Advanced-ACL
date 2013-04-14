@@ -60,13 +60,13 @@ class Role extends ACLBase
 
     public static function getCapsForRole($term_id)
     {
-        $term = get_term($term_id);
+        $term = get_term($term_id, static::ROLE);
 
         if (static::ROLE !== $term->taxonomy) {
             return array();
         }
 
-        $terms = static::resolveParent($terms, array($term_id));
+        $terms = static::resolveParent($term, array($term_id));
 
         $posts = get_posts(array(
             'post_type'         => static::CAP,
@@ -86,6 +86,8 @@ class Role extends ACLBase
             return $post->post_title;
         }, $posts);
 
+        array_unshift($caps, $term->slug);
+
         return $caps;
     }
 
@@ -99,6 +101,6 @@ class Role extends ACLBase
         $parents[] = $term->parent;
 
         // check the next term to see if it has a parent
-        return static::resolveParent(get_term($term->parent), $parents);
+        return static::resolveParent(get_term($term->parent, static::ROLE), $parents);
     }
 }
