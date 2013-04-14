@@ -23,6 +23,7 @@ function advancedacl_load()
         AdvancedACL\Admin\CapabilityList::init();
         AdvancedACL\Admin\RoleList::init();
         AdvancedACL\Admin\UserList::init();
+        AdvancedACL\Admin\UserEdit::init();
         AdvancedACL\Admin\Ajax::init();
     }
 
