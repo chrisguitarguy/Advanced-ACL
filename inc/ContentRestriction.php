@@ -32,8 +32,8 @@ class ContentRestriction extends ACLBase
         }
 
         $exclude = array();
-        foreach ($restricted as $r) {
-            $caps = static::getPostRestrictions($r);
+        foreach ($restricted as $id => $cap_str) {
+            $caps = explode(',', $cap_str);
 
             $can_read = false;
             foreach ($caps as $cap) {
@@ -47,7 +47,7 @@ class ContentRestriction extends ACLBase
 
             // we the user didn't have any of the caps, exclude the post
             if (!$can_read) {
-                $exclude[] = $r;
+                $exclude[] = $id;
             }
         }
 
@@ -62,12 +62,29 @@ class ContentRestriction extends ACLBase
         $q->set('post__not_in', array_unique(array_merge($not_in, $exclude)));
     }
 
+    public function changeFields($fields)
+    {
+        global $wpdb;
+
+        return "{$wpdb->posts}.ID, {$wpdb->postmeta}.meta_value AS post_parent";
+    }
+
     private function getRestrictedPosts($vars)
     {
-        $vars = array_replace($vars, array(
+        // XXX id=>parent is used in the `fields` argument below. If you don't
+        // select `ids` or `id=>parent` WP runs the posts array through `get_post`
+        // to fill out all the post objects. We don't won't that. We just want
+        // ID => restrictions pairs. So we fake post_parent by hooking into
+        // `posts_fields` and pretending our meta field is post_parent.
+        // This is very much a hack, but I need get_posts to deal with actually
+        // parsing the query vars and such. It also lets us skip over a lot of
+        // comment nonsense and other stuff.
+        $args = array_replace($vars, array(
             'nopaging'          => true,
-            'fields'            => 'ids',
-            'supress_filters'   => false,
+            'suppress_filters'  => false,
+            'fields'            => 'id=>parent',
+            'orderby'           => 'ID', // order doesn't matter, make it easy
+            'order'             => 'ASC',
             'meta_query'        => array(
                 array(
                     'key'       => static::RESTRICT_FIELD,
@@ -76,6 +93,12 @@ class ContentRestriction extends ACLBase
             ),
         ));
 
-        return static::filter('restricted_posts', get_posts($vars));
+        add_filter('posts_fields', array($this, 'changeFields'));
+
+        $posts = get_posts($args);
+
+        remove_filter('posts_fields', array($this, 'changeFields'));
+
+        return static::filter('restricted_posts', $posts, $args, $vars);
     }
 }
