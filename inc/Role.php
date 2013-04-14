@@ -60,6 +60,10 @@ class Role extends ACLBase
 
     public static function getCapsForRole($term_id)
     {
+        if (false !== $cached = wp_cache_get($term_id, 'aacl_caps_role')) {
+            return $cached;
+        }
+
         $term = get_term($term_id, static::ROLE);
 
         if (static::ROLE !== $term->taxonomy) {
@@ -72,12 +76,18 @@ class Role extends ACLBase
 
         array_unshift($caps, $term->slug);
 
+        wp_cache_set($term_id, $caps, 'aacl_caps_role');
+
         return $caps;
     }
 
     public static function getRolesForUser($user_id)
     {
         global $wpdb;
+
+        if (false !== $cached = wp_cache_get($user_id, 'aacl_user_roles')) {
+            return $cached;
+        }
 
         $stm = $wpdb->prepare(
             "SELECT t.*, tt.* FROM {$wpdb->terms} AS t"
@@ -101,12 +111,18 @@ class Role extends ACLBase
             $roles = array();
         }
 
+        wp_cache_set($user_id, $roles, 'aacl_user_roles');
+
         return static::filter('roles_from_aliases', $roles, $user_id);
     }
 
     public static function getCapabilitiesForUser($user_id)
     {
         global $wpdb;
+
+        if (false !== $cached = wp_cache_get($user_id, 'aacl_user_caps')) {
+            return $cached;
+        }
 
         $roles = static::getRolesForUser($user_id);
 
@@ -128,6 +144,8 @@ class Role extends ACLBase
         foreach ($roles as $role) {
             array_unshift($caps, $role->slug);
         }
+
+        wp_cache_set($user_id, $caps, 'aacl_user_caps');
 
         return static::filter('caps_for_user', $caps, $roles, $user_id);
     }
