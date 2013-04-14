@@ -17,6 +17,7 @@ class Role extends ACLBase
     public function _setup()
     {
         add_action('init', array($this, 'register'));
+        add_filter('user_has_cap', array($this, 'addCaps'));
     }
 
     public function register()
@@ -56,6 +57,18 @@ class Role extends ACLBase
         ));
 
         register_taxonomy(static::ROLE, static::CAP, $args);
+    }
+
+    public function addCaps($allcaps)
+    {
+        // caps are cached, so we can do this multiple times.
+        $custom_caps = static::getCapabilitiesForUser(get_current_user_id());
+
+        foreach ($custom_caps as $cap) {
+            $allcaps[$cap] = true;
+        }
+
+        return $allcaps;
     }
 
     public static function getCapsForRole($term_id)
@@ -139,7 +152,7 @@ class Role extends ACLBase
             $ids = static::resolveParent($role, $ids);
         }
 
-        $caps = static::getCapsByRoles(array_unique($ids));
+        $caps = static::getCapsByRoles($ids);
 
         foreach ($roles as $role) {
             array_unshift($caps, $role->slug);
@@ -165,23 +178,27 @@ class Role extends ACLBase
 
     private static function getCapsByRoles($role_list)
     {
-        $posts = get_posts(array(
-            'post_type'         => static::CAP,
-            'nopaging'          => true,
-            'suppress_filters'  => false,
-            'tax_query'         => array(
-                array(
-                    'taxonomy'          => static::ROLE,
-                    'terms'             => $role_list,
-                    'include_children'  => false,
-                    'operator'          => 'IN',
-                ),
-            ),
-        ));
+        global $wpdb;
 
-        $caps = array_map(function($post) {
-            return $post->post_title;
-        }, $posts);
+        $role_list = array_filter(array_unique($role_list));
+        $bind = implode(', ', array_fill(0, count($role_list), '%d'));
+
+        $sql = "SELECT DISTINCT p.post_title FROM {$wpdb->posts} AS p"
+            . " INNER JOIN {$wpdb->term_relationships} as tr ON tr.object_id = p.ID"
+            . " WHERE p.post_type = %s"
+            . " AND p.post_status = 'publish'"
+            . " AND tr.term_taxonomy_id IN ("
+                . " SELECT tt.term_taxonomy_id"
+                . " FROM {$wpdb->term_taxonomy} AS tt"
+                . " WHERE tt.taxonomy = %s AND tt.term_id IN ({$bind})"
+            . ")";
+
+        $args = array($sql, static::CAP, static::ROLE);
+        foreach ($role_list as $id) {
+            $args[] = $id;
+        }
+
+        $caps = $wpdb->get_col(call_user_func_array(array($wpdb, 'prepare'), $args));
 
         return $caps;
     }
