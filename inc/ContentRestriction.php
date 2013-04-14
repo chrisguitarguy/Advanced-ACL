@@ -56,7 +56,7 @@ class ContentRestriction extends ACLBase
         if (!$not_in) {
             $not_in = array();
         } elseif (!is_array($not_in)) {
-            $not_in = explode(',', $not_id);
+            $not_in = explode(',', $not_in);
         }
 
         $q->set('post__not_in', array_unique(array_merge($not_in, $exclude)));
