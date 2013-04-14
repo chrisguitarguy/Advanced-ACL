@@ -19,6 +19,10 @@ abstract class ACLBase
     const A_ROLE    = 'aacl_urole'; // user role taxonomy, alias of ROLE
     const VER       = '0.1';
 
+    // content restriction
+    const ENABLE_FIELD      = 'aacl_enable_restriction';
+    const RESTRICT_FIELD    = 'aacl_required_caps';
+
     private static $reg = array();
 
     public static function instance()
@@ -63,11 +67,27 @@ abstract class ACLBase
         return call_user_func_array('do_action', $args);
     }
 
+    public static function getPostRestrictions($post_id)
+    {
+        $caps = get_post_meta($post_id, static::RESTRICT_FIELD, true);
+
+        return static::filter('post_restriction_caps', explode(',', $caps), $post_id);
+    }
+
     abstract public function _setup();
 
     protected static function getEditCap()
     {
         return static::filter('edit_capability', 'manage_options');
+    }
+
+    protected static function getPostTypes()
+    {
+        $types = get_post_types(array(
+            'public'    => true,
+        ));
+
+        return static::filter('content_restriction_types', $types);
     }
 
     private static function prefixHook($name)

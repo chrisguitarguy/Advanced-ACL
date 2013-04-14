@@ -50,10 +50,11 @@ class CapabilityEdit extends \Chrisguitarguy\AdvancedACL\ACLBase
 
     public function saveBoxCallback($post)
     {
-        ?>
-        <?php submit_button(__('Save', AACL_TD), 'hidden', 'pre_save', false); ?>
+        submit_button(__('Save', AACL_TD), 'hidden', 'pre_save', false); ?>
 
         <div id="misc-publishing-actions">
+
+            <?php static::act('before_cap_status', $post); ?>
 
             <div class="misc-pub-section">
                 <label for="post_status">
@@ -70,6 +71,8 @@ class CapabilityEdit extends \Chrisguitarguy\AdvancedACL\ACLBase
                     </select>
                 </label>
             </div>
+
+            <?php static::act('after_cap_status', $post); ?>
 
         </div>
 
@@ -91,6 +94,8 @@ class CapabilityEdit extends \Chrisguitarguy\AdvancedACL\ACLBase
             <div class="clear"> </div>
         </div>
         <?php
+
+        static::act('after_cap_save', $post);
     }
 
     public function statusMessages($messages)
