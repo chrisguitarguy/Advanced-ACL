@@ -20,8 +20,8 @@ abstract class ACLBase
     const VER       = '0.1';
 
     // content restriction
-    const ENABLE_FIELD      = 'aacl_enable_restriction';
-    const RESTRICT_FIELD    = 'aacl_required_caps';
+    const ENABLE_FIELD      = '_aacl_enable_restriction';
+    const RESTRICT_FIELD    = '_aacl_required_caps';
 
     private static $reg = array();
 
