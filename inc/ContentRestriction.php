@@ -20,6 +20,8 @@ class ContentRestriction extends ACLBase
     {
         add_action('pre_get_posts', array($this, 'alterQuery'));
         add_action('template_redirect', array($this, 'catchSingular'));
+        add_action('before_delete_post', array($this, 'syncRestrictions'));
+        add_action('wp_trash_post', array($this, 'syncRestrictions'));
     }
 
     public function alterQuery(\WP_Query $q)
@@ -86,6 +88,47 @@ class ContentRestriction extends ACLBase
     public function hijackTemplate()
     {
         return $this->template_found;
+    }
+
+    public function syncRestrictions($post_id, $check_enabled=true)
+    {
+        // we only care about delete/trashing capabilities
+        // also allow users to "disable" this sync with a filter.
+        if (get_post_type($post_id) !== static::CAP || static::filter('disable_capability_sync', false, $post_id)) {
+            return;
+        }
+
+        // was this even a content restriction capability?
+        if ($check_enabled && 'on' != get_post_meta($post_id, static::ENABLE_FIELD, true)) {
+            return;
+        }
+
+        // the capability we need to look for.
+        $capability = get_post_field('post_title', $post_id, 'raw');
+
+        // get all posts with restrictions...
+        $posts = $this->getRestrictedPosts(array('post_type' => 'any'));
+
+        // loop through each, see if the capability we're deleting is in them
+        foreach ($posts as $id => $cap_str) {
+            $caps = explode(',', $cap_str);
+
+            // do we have capability in our caps array?
+            if (false === $index = array_search($capability, $caps)) {
+                continue;
+            }
+
+            // remove the capabilty that's being deleted
+            unset($caps[$index]);
+
+            if (empty($caps)) {
+                // that was the only one, remove the restrictions.
+                delete_post_meta($id, static::RESTRICT_FIELD);
+            } else {
+                // not the only restriction, resave them
+                update_post_meta($id, static::RESTRICT_FIELD, implode(',', $caps));
+            }
+        }
     }
 
     public function changeFields($fields)
