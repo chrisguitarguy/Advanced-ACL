@@ -74,6 +74,28 @@ abstract class ACLBase
         return static::filter('post_restriction_caps', explode(',', $caps), $post_id);
     }
 
+    public static function userCanRead($post_id, $caps=null)
+    {
+        if (!$caps) {
+            $caps = static::getPostRestrictions($post_id);
+        }
+
+        $can_read = true;
+
+        if ($caps) {
+            $can_read = false;
+
+            foreach ($caps as $cap) {
+                if (current_user_can($cap)) {
+                    $can_read = true;
+                    break;
+                }
+            }
+        }
+
+        return static::filter('user_can_read', $can_read, $post_id, $caps);
+    }
+
     abstract public function _setup();
 
     protected static function getEditCap()

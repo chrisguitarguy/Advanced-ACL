@@ -14,14 +14,22 @@ namespace Chrisguitarguy\AdvancedACL;
 
 class ContentRestriction extends ACLBase
 {
+    private $template_found = false;
+
     public function _setup()
     {
         add_action('pre_get_posts', array($this, 'alterQuery'));
+        add_action('template_redirect', array($this, 'catchSingular'));
     }
 
     public function alterQuery(\WP_Query $q)
     {
-        if (is_admin() || !$q->is_main_query() || current_user_can(static::getEditCap())) {
+        if (
+            is_admin() || // do nothing in the admin area
+            !$q->is_main_query() || // only modify the main query
+            current_user_can(static::getEditCap()) || // if a user can assign roles, etc. leave them alone
+            !(is_archive() || is_home()) // we need to be on an archive page or the home page.
+        ) {
             return;
         }
 
@@ -35,18 +43,7 @@ class ContentRestriction extends ACLBase
         foreach ($restricted as $id => $cap_str) {
             $caps = explode(',', $cap_str);
 
-            $can_read = false;
-            foreach ($caps as $cap) {
-                // A user must have ONE of the caps to read the post
-                // an OR relation, in other words.
-                if (current_user_can($cap)) {
-                    $can_read = true;
-                    break;
-                }
-            }
-
-            // we the user didn't have any of the caps, exclude the post
-            if (!$can_read) {
+            if (!static::userCanRead($id, $caps)) {
                 $exclude[] = $id;
             }
         }
@@ -60,6 +57,35 @@ class ContentRestriction extends ACLBase
         }
 
         $q->set('post__not_in', array_unique(array_merge($not_in, $exclude)));
+    }
+
+    public function catchSingular()
+    {
+        global $wp_query;
+
+        if (!is_singular()) {
+            return;
+        }
+
+        $post_id = get_queried_object_id();
+
+        if (static::userCanRead($post_id)) {
+            return;
+        }
+
+        $this->template_found = static::filter('restricted_template', locate_template('restricted.php'), $post_id);
+
+        if ($this->template_found) {
+            add_filter('template_include', array($this, 'hijackTemplate'));
+        } else {
+            // we didn't find a restricted template, set the 404
+            $wp_query->set_404();
+        }
+    }
+
+    public function hijackTemplate()
+    {
+        return $this->template_found;
     }
 
     public function changeFields($fields)
