@@ -117,7 +117,7 @@ abstract class ACLBase
         return static::filter('content_restriction_types', $types);
     }
 
-    private static function prefixHook($name)
+    protected static function prefixHook($name)
     {
         return "advancedacl_{$name}";
     }
