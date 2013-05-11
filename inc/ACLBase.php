@@ -81,6 +81,16 @@ abstract class ACLBase
 
     public static function userCanRead($post_id, $caps=null)
     {
+        // admins can read anything, no exceptions
+        if (current_user_can(static::getEditCap())) {
+            return true;
+        }
+
+        // lead plugins completely short circut this.
+        if (null !== $can_read = static::filter('pre_user_can_read', null, $post_id, $caps)) {
+            return $can_read;
+        }
+
         if (!$caps) {
             $caps = static::getPostRestrictions($post_id);
         }
