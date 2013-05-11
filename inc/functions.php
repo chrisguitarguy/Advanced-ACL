@@ -29,5 +29,9 @@ function advancedacl_load()
         AdvancedACL\Admin\Ajax::init();
     }
 
+    if (class_exists('bbPress', false)) {
+        AdvancedACL\BBPress::init();
+    }
+
     do_action('advancedacl_loaded');
 }
