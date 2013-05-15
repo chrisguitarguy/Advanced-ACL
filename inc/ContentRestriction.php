@@ -77,6 +77,11 @@ class ContentRestriction extends ACLBase
 
         $this->template_found = static::filter('restricted_template', locate_template('restricted.php'), $post_id);
 
+        // This fires after status header, so we have to send our own, again.
+        static::act('on_restricted_item', $post_id);
+
+        status_header(static::filter('restricted_item_status', 401, $post_id));
+
         if ($this->template_found) {
             add_filter('template_include', array($this, 'hijackTemplate'));
         } else {
