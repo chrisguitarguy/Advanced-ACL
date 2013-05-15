@@ -30,12 +30,13 @@ class ContentRestriction extends ACLBase
             is_admin() || // do nothing in the admin area
             !$q->is_main_query() || // only modify the main query
             current_user_can(static::getEditCap()) || // if a user can assign roles, etc. leave them alone
-            !(is_archive() || is_home()) // we need to be on an archive page or the home page.
+            !(is_archive() || is_home() || is_search()) // we need to be on an archive page or the home page.
         ) {
             return;
         }
 
-        $restricted = $this->getRestrictedPosts($q->query);
+        // fetch ALL restricted posts on search pages.
+        $restricted = $this->getRestrictedPosts(is_search() ? array('post_type' => 'any') : $q->query);
 
         if (!$restricted) {
             return;
