@@ -27,6 +27,7 @@ function advancedacl_load()
         AdvancedACL\Admin\UserEdit::init();
         AdvancedACL\Admin\ContentRestriction::init();
         AdvancedACL\Admin\Ajax::init();
+        AdvancedACL\Admin\MigrationManager::init();
     }
 
     if (class_exists('bbPress', false)) {
