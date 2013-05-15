@@ -104,7 +104,7 @@ class Role extends ACLBase
 
         $stm = $wpdb->prepare(
             "SELECT t.*, tt.* FROM {$wpdb->terms} AS t"
-            . " INNER JOIN {$wpdb->term_taxonomy} as TT ON t.term_id = tt.term_id"
+            . " INNER JOIN {$wpdb->term_taxonomy} as tt ON t.term_id = tt.term_id"
             . " WHERE tt.taxonomy = %s AND t.term_group IN ("
                 . " SELECT DISTINCT t2.term_group FROM {$wpdb->terms} AS t2"
                 . " INNER JOIN {$wpdb->term_taxonomy} AS tt2 ON t2.term_id = tt2.term_id"
