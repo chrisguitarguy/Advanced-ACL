@@ -17,7 +17,7 @@ class RoleAlias extends ACLBase
     public function _setup()
     {
         add_action('init', array($this, 'register'));
-        add_action('created_' . static::ROLE, array($this, 'create'));
+        add_action('create_' . static::ROLE, array($this, 'create'));
         add_action('edited_' . static::ROLE, array($this, 'edit'));
         add_action('delete_' . static::ROLE, array($this, 'delete'), 10, 3);
     }
