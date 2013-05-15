@@ -118,7 +118,7 @@ class RoleAlias extends ACLBase
         return static::filter('role_dropdown_terms', $out);
     }
 
-    private function getTerms($term_group)
+    public function getTerms($term_group)
     {
         static::enableTermGroup();
 
