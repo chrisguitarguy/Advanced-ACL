@@ -50,8 +50,7 @@ class GroupsMigration implements MigrationInterface
             }
         }
 
-        header('Content-Type: text/plain');
-        $ra = RoleAlias::instance();
+        $user_save = array();
         foreach ($this->getUserGroups() as $obj) {
             if (!isset($role_map[$obj->group_id])) {
                 continue;
@@ -59,15 +58,23 @@ class GroupsMigration implements MigrationInterface
 
             $term = get_term($role_map[$obj->group_id], RoleAlias::ROLE);
 
-            $aliases = $ra->getTerms($term->term_group);
+            $aliases = $this->getRoleAliases($term->term_group);
 
-            if (is_wp_error($aliases) || !$aliases) {
+            if (!$aliases) {
                 continue;
             }
 
-            foreach ($aliases as $a) {
-                wp_set_object_terms($obj->user_id, array(intval($a->term_id)), RoleAlias::A_ROLE, true);
+            if (!isset($user_save[$obj->user_id])) {
+                $user_save[$obj->user_id] = array();
             }
+
+            foreach ($aliases as $a) {
+                $user_save[$obj->user_id][] = intval($a);
+            }
+        }
+
+        foreach ($user_save as $user_id => $terms) {
+            wp_set_object_terms($user_id, array_unique($terms), RoleAlias::A_ROLE, true);
         }
 
         $this->migrateRestricted();
@@ -122,5 +129,19 @@ class GroupsMigration implements MigrationInterface
         foreach ($meta as $row) {
             update_post_meta($row->post_id, RoleAlias::RESTRICT_FIELD, $row->caps);
         }
+    }
+
+    private function getRoleAliases($term_group)
+    {
+        global $wpdb;
+
+        return $wpdb->get_col($wpdb->prepare(
+            "SELECT t.term_id FROM {$wpdb->terms} as t"
+            . " INNER JOIN {$wpdb->term_taxonomy} AS tt"
+            . " ON t.term_id = tt.term_id"
+            . " WHERE t.term_group = %d AND tt.taxonomy = %s",
+            $term_group,
+            RoleAlias::A_ROLE
+        ));
     }
 }
