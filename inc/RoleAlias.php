@@ -48,10 +48,17 @@ class RoleAlias extends ACLBase
     {
         $term = get_term($term_id, static::ROLE);
 
+        // when we insert a term with `alias_of` it triggers an update
+        // of the original term. We don't want to recursively create stuf
+        // so unhook our edit method before we do this.
+        remove_action('edited_' . static::ROLE, array($this, 'edit'));
+
         wp_insert_term($term->name, static::A_ROLE, array(
             'slug'      => $term->slug . '_user',
             'alias_of'  => $term->slug,
         ));
+
+        add_action('edited_' . static::ROLE, array($this, 'edit'));
     }
 
     public function edit($term_id)
