@@ -26,8 +26,12 @@ class ContentRestriction extends ACLBase
 
     public function alterQuery(\WP_Query $q)
     {
+        // let users completely avoid this.
+        if (is_admin() || static::filter('no_alter_query', false, $q)) {
+            return;
+        }
+
         if (
-            is_admin() || // do nothing in the admin area
             !$q->is_main_query() || // only modify the main query
             current_user_can(static::getEditCap()) || // if a user can assign roles, etc. leave them alone
             !(is_archive() || is_home() || is_search()) // we need to be on an archive page or the home page.
