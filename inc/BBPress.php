@@ -20,6 +20,7 @@ class BBPress extends ACLBase
         add_filter(static::prefixHook('content_restriction_types'), array($this, 'removeTopicReply'));
         add_filter('bbp_after_has_topics_parse_args', array($this, 'removeRestrictedTopics'));
         add_filter('bbp_after_has_forums_parse_args', array($this, 'removeRestrictedForums'));
+        add_filter('bbp_after_has_search_results_parse_args', array($this, 'removeRestrictedTopicsForums'));
     }
 
     public function changeTopicReply($null, $post_id)
@@ -115,6 +116,19 @@ class BBPress extends ACLBase
             ));
 
             $args['post__not_in'] = $not_in;
+        }
+
+        return $args;
+    }
+
+    public function removeRestrictedTopicsForums($args)
+    {
+        $args = $this->removeRestrictedForums($args);
+        $args = $this->removeRestrictedTopics($args);
+
+        // XXX this is WordPress 3.6 only
+        if (!empty($args['post__not_in'])) {
+            $args['post_parent__not_in'] = $args['post__not_in'];
         }
 
         return $args;
