@@ -18,6 +18,7 @@ abstract class ACLBase
     const ROLE      = 'aacl_role'; // role taxonomy
     const A_ROLE    = 'aacl_urole'; // user role taxonomy, alias of ROLE
     const VER       = '0.1';
+    const D_ROLE    = 'aacl_default_role'; // the default role options key
 
     // content restriction
     const ENABLE_FIELD      = '_aacl_enable_restriction';

@@ -18,6 +18,7 @@ function advancedacl_load()
     AdvancedACL\Role::init();
     AdvancedACL\RoleAlias::init();
     AdvancedACL\ContentRestriction::init();
+    AdvancedACL\DefaultRole::init();
 
     if (is_admin()) {
         AdvancedACL\Admin\CapabilityEdit::init();
@@ -28,6 +29,7 @@ function advancedacl_load()
         AdvancedACL\Admin\ContentRestriction::init();
         AdvancedACL\Admin\Ajax::init();
         AdvancedACL\Admin\MigrationManager::init();
+        AdvancedACL\Admin\DefaultRole::init();
     }
 
     if (class_exists('bbPress', false)) {
