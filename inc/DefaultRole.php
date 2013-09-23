@@ -21,7 +21,7 @@ class DefaultRole extends ACLBase
 
     public function setDefaultRole($user_id)
     {
-        $role = absint($this->getDefaultRole());
+        $role = absint($this->getDefaultRole($user_id));
         if (!$role || !term_exists($role, static::A_ROLE)) {
             return;
         }
