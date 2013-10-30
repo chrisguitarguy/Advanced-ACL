@@ -113,10 +113,12 @@ class CapabilityEdit extends \Chrisguitarguy\AdvancedACL\ACLBase
         echo '<label for="cap_desc">', __('Description', AACL_TD), '</label>';
         echo '</h3>';
 
+        echo '<p>';
         printf(
             '<textarea name="content" id="cap_desc" class="widefat" rows="10">%1$s</textarea>',
             esc_textarea($content)
         );
+        echo '</p>';
     }
 
     public function enterTitle($t)
