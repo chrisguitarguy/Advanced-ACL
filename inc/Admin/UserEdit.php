@@ -21,10 +21,6 @@ class UserEdit extends \Chrisguitarguy\AdvancedACL\ACLBase
 
     public function _setup()
     {
-        if (!current_user_can(static::getEditCap())) {
-            return;
-        }
-
         foreach (array('edit_user_profile_update', 'personal_options_update') as $a) {
             add_action($a, array($this, 'save'));
         }
@@ -36,6 +32,10 @@ class UserEdit extends \Chrisguitarguy\AdvancedACL\ACLBase
 
     public function save($user_id)
     {
+        if (!current_user_can(static::getEditCap())) {
+            return;
+        }
+
         if (
             !isset($_POST[static::NONCE]) ||
             !wp_verify_nonce($_POST[static::NONCE], static::NONCE . $user_id)
@@ -52,6 +52,10 @@ class UserEdit extends \Chrisguitarguy\AdvancedACL\ACLBase
 
     public function fields($user)
     {
+        if (!current_user_can(static::getEditCap())) {
+            return;
+        }
+
         wp_nonce_field(static::NONCE . $user->ID, static::NONCE, false);
 
         echo '<h3>', esc_html__('Advanced Roles', AACL_TD), '</h3>';
