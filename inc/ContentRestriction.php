@@ -47,11 +47,9 @@ class ContentRestriction extends ACLBase
         }
 
         $exclude = array();
-        foreach ($restricted as $id => $cap_str) {
-            $caps = explode(',', $cap_str);
-
-            if (!static::userCanRead($id, $caps)) {
-                $exclude[] = $id;
+        foreach ($restricted as $post_id) {
+            if (!static::userCanRead($post_id)) {
+                $exclude[] = $post_id;
             }
         }
 
@@ -141,13 +139,6 @@ class ContentRestriction extends ACLBase
         }
     }
 
-    public function changeFields($fields)
-    {
-        global $wpdb;
-
-        return "{$wpdb->posts}.ID, {$wpdb->postmeta}.meta_value AS post_parent";
-    }
-
     private function getRestrictedPosts($vars)
     {
         // XXX id=>parent is used in the `fields` argument below. If you don't
@@ -161,7 +152,7 @@ class ContentRestriction extends ACLBase
         $args = array_replace($vars, array(
             'nopaging'          => true,
             'suppress_filters'  => false,
-            'fields'            => 'id=>parent',
+            'fields'            => 'ids',
             'orderby'           => 'ID', // order doesn't matter, make it easy
             'order'             => 'ASC',
             'meta_query'        => array(
@@ -172,12 +163,6 @@ class ContentRestriction extends ACLBase
             ),
         ));
 
-        add_filter('posts_fields', array($this, 'changeFields'));
-
-        $posts = get_posts($args);
-
-        remove_filter('posts_fields', array($this, 'changeFields'));
-
-        return static::filter('restricted_posts', $posts, $args, $vars);
+        return static::filter('restricted_posts', get_posts($args), $args, $vars);
     }
 }
