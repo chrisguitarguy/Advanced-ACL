@@ -72,7 +72,6 @@ abstract class ACLBase
     {
         $caps = get_post_meta($post_id, static::RESTRICT_FIELD, true);
 
-
         return static::filter(
             'post_restriction_caps',
             $caps ? explode(',', $caps) : array(),
