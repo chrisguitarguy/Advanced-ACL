@@ -17,7 +17,7 @@ class Role extends ACLBase
     public function _setup()
     {
         add_action('init', array($this, 'register'));
-        add_filter('user_has_cap', array($this, 'addCaps'));
+        add_filter('user_has_cap', array($this, 'addCaps'), 10, 4);
     }
 
     public function register()
@@ -59,10 +59,10 @@ class Role extends ACLBase
         register_taxonomy(static::ROLE, static::CAP, $args);
     }
 
-    public function addCaps($allcaps)
+    public function addCaps($allcaps, $caps, $args, $user)
     {
         // caps are cached, so we can do this multiple times.
-        $custom_caps = static::getCapabilitiesForUser(get_current_user_id());
+        $custom_caps = static::getCapabilitiesForUser($user->ID);
 
         foreach ($custom_caps as $cap) {
             $allcaps[$cap] = true;
