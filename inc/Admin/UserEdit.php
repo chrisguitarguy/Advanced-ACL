@@ -48,9 +48,6 @@ class UserEdit extends \Chrisguitarguy\AdvancedACL\ACLBase
         $terms = array_filter(array_map('absint', $terms));
 
         wp_set_object_terms($user_id, $terms, static::A_ROLE, false);
-
-        wp_cache_delete($user_id, self::CACHE_USERROLES);
-        wp_cache_delete($user_id, self::CACHE_USERCAPS);
     }
 
     public function fields($user)

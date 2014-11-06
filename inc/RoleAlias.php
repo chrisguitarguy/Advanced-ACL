@@ -20,6 +20,7 @@ class RoleAlias extends ACLBase
         add_action('create_' . static::ROLE, array($this, 'create'));
         add_action('edited_' . static::ROLE, array($this, 'edit'));
         add_action('delete_' . static::ROLE, array($this, 'delete'), 10, 3);
+        add_action('set_object_terms', array($this, 'clearCache'), 10, 4);
     }
 
     public function register()
@@ -123,6 +124,16 @@ class RoleAlias extends ACLBase
         asort($out);
 
         return static::filter('role_dropdown_terms', $out);
+    }
+
+    public function clearCache($userId, $terms, $ttid, $taxonomy)
+    {
+        if (self::A_ROLE !== $taxonomy) {
+            return;
+        }
+
+        wp_cache_delete($user_id, self::CACHE_USERROLES);
+        wp_cache_delete($user_id, self::CACHE_USERCAPS);
     }
 
     public function getTerms($term_group)
