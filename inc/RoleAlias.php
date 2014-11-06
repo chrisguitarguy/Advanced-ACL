@@ -132,8 +132,8 @@ class RoleAlias extends ACLBase
             return;
         }
 
-        wp_cache_delete($user_id, self::CACHE_USERROLES);
-        wp_cache_delete($user_id, self::CACHE_USERCAPS);
+        wp_cache_delete($userId, self::CACHE_USERROLES);
+        wp_cache_delete($userId, self::CACHE_USERCAPS);
     }
 
     public function getTerms($term_group)
