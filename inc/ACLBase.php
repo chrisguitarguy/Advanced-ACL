@@ -24,6 +24,10 @@ abstract class ACLBase
     const ENABLE_FIELD      = '_aacl_enable_restriction';
     const RESTRICT_FIELD    = '_aacl_required_caps';
 
+    const CACHE_USERCAPS    = 'aacl_user_caps';
+    const CACHE_USERROLES   = 'aacl_user_roles';
+    const CACHE_ROLECAPS    = 'aacl_caps_role';
+
     private static $reg = array();
 
     public static function instance()
